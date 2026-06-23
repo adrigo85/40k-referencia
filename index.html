@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>40K Reference – 11ª Edición</title>
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #16161a;
+      --surface2: #1e1e24;
+      --border: #2a2a35;
+      --accent: #c0392b;
+      --accent2: #e74c3c;
+      --gold: #c9a84c;
+      --text: #e8e8ec;
+      --text-muted: #888899;
+      --phase-cmd: #8e44ad;
+      --phase-mov: #2980b9;
+      --phase-shoot: #c0392b;
+      --phase-charge: #d35400;
+      --phase-fight: #c0392b;
+      --phase-morale: #27ae60;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #0d0d0f 0%, #1a0a0a 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .skull-icon {
+      font-size: 24px;
+      filter: drop-shadow(0 0 6px var(--accent));
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    h1 span {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 400;
+      display: block;
+      letter-spacing: 2px;
+    }
+
+    /* SEARCH */
+    .search-wrap {
+      position: relative;
+    }
+
+    #search {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px 10px 40px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    #search:focus { border-color: var(--accent); }
+    #search::placeholder { color: var(--text-muted); }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    /* PHASE FILTER */
+    .phases {
+      display: flex;
+      gap: 6px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .phases::-webkit-scrollbar { display: none; }
+
+    .phase-btn {
+      white-space: nowrap;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .phase-btn.active,
+    .phase-btn:hover {
+      color: var(--text);
+      border-color: currentColor;
+    }
+
+    .phase-btn[data-phase="all"].active    { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .phase-btn[data-phase="comando"].active  { background: var(--phase-cmd); border-color: var(--phase-cmd); color: #fff; }
+    .phase-btn[data-phase="movimiento"].active { background: var(--phase-mov); border-color: var(--phase-mov); color: #fff; }
+    .phase-btn[data-phase="disparo"].active  { background: var(--phase-shoot); border-color: var(--phase-shoot); color: #fff; }
+    .phase-btn[data-phase="carga"].active    { background: var(--phase-charge); border-color: var(--phase-charge); color: #fff; }
+    .phase-btn[data-phase="combate"].active  { background: var(--phase-fight); border-color: var(--phase-fight); color: #fff; }
+    .phase-btn[data-phase="moral"].active    { background: var(--phase-morale); border-color: var(--phase-morale); color: #fff; }
+
+    /* MAIN */
+    main {
+      padding: 12px 16px 80px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .results-info {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      letter-spacing: .5px;
+    }
+
+    /* RULE CARD */
+    .rule-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+
+    .rule-card:hover { border-color: #444; }
+
+    .rule-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .phase-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .rule-title {
+      font-size: 15px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .phase-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 10px;
+      opacity: .8;
+    }
+
+    .chevron {
+      color: var(--text-muted);
+      font-size: 12px;
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+
+    .rule-card.open .chevron { transform: rotate(180deg); }
+
+    .rule-body {
+      display: none;
+      padding: 0 14px 14px;
+    }
+
+    .rule-card.open .rule-body { display: block; }
+
+    .rule-desc {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #ccc;
+      margin-bottom: 12px;
+    }
+
+    .rule-example {
+      background: var(--surface2);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .rule-example strong {
+      color: var(--gold);
+      display: block;
+      margin-bottom: 4px;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .rule-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      letter-spacing: .5px;
+    }
+
+    /* NO RESULTS */
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .no-results .icon { font-size: 40px; margin-bottom: 12px; }
+    .no-results p { font-size: 14px; }
+
+    /* COLORS BY PHASE */
+    [data-phase="comando"]   .phase-dot { background: var(--phase-cmd); }
+    [data-phase="movimiento"] .phase-dot { background: var(--phase-mov); }
+    [data-phase="disparo"]   .phase-dot { background: var(--phase-shoot); }
+    [data-phase="carga"]     .phase-dot { background: var(--phase-charge); }
+    [data-phase="combate"]   .phase-dot { background: var(--phase-fight); }
+    [data-phase="moral"]     .phase-dot { background: var(--phase-morale); }
+
+    [data-phase="comando"]   .phase-badge { background: #8e44ad33; color: #c39bd3; }
+    [data-phase="movimiento"] .phase-badge { background: #2980b933; color: #85c1e9; }
+    [data-phase="disparo"]   .phase-badge { background: #c0392b33; color: #f1948a; }
+    [data-phase="carga"]     .phase-badge { background: #d3540033; color: #f0b27a; }
+    [data-phase="combate"]   .phase-badge { background: #c0392b33; color: #f1948a; }
+    [data-phase="moral"]     .phase-badge { background: #27ae6033; color: #82e0aa; }
+
+    /* HIGHLIGHT */
+    mark {
+      background: #c9a84c44;
+      color: var(--gold);
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
+    /* FOOTER */
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 8px 16px;
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <span class="skull-icon">☠</span>
+    <div>
+      <h1>40K Reference <span>11ª Edición · Reglas Core</span></h1>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="search" id="search" placeholder="Buscar regla, fase o término..." autocomplete="off" />
+  </div>
+</header>
+
+<div class="phases">
+  <button class="phase-btn active" data-phase="all">Todas</button>
+  <button class="phase-btn" data-phase="comando">⚔ Comando</button>
+  <button class="phase-btn" data-phase="movimiento">👣 Movimiento</button>
+  <button class="phase-btn" data-phase="disparo">🎯 Disparo</button>
+  <button class="phase-btn" data-phase="carga">💨 Carga</button>
+  <button class="phase-btn" data-phase="combate">⚡ Combate</button>
+  <button class="phase-btn" data-phase="moral">🧠 Moral</button>
+</div>
+
+<main>
+  <div class="results-info" id="results-info"></div>
+  <div id="rules-list"></div>
+</main>
+
+<footer>FOR THE EMPEROR · 40K REF 11ª ED</footer>
+
+<script>
+const RULES = [
+  // ───────────── FASE DE COMANDO ─────────────
+  {
+    phase: "comando",
+    title: "Fase de Comando",
+    desc: "Al inicio de tu turno, cada jugador gana 1 Punto de Mando (CP). En la Fase de Comando también se resuelven las habilidades que se activan 'al inicio de tu turno'. El jugador activo es el primero en resolver sus efectos.",
+    example: "Tienes 2 CP al inicio de tu turno. Ganas 1 CP más, quedando en 3 CP. Usas una Estratagema de 1 CP, quedando con 2 CP para el resto del turno.",
+    tags: ["CP", "puntos de mando", "turno"]
+  },
+  {
+    phase: "comando",
+    title: "Estratagemas",
+    desc: "Las Estratagemas se pagan con Puntos de Mando (CP). Solo puedes usar cada Estratagema una vez por fase, salvo que indique lo contrario. No puedes usar Estratagemas en unidades en estado Battle-shocked.",
+    example: "Quieres usar 'Fuego Sostenido' (1 CP) durante la Fase de Disparo para que tu unidad de Intercessors dispare dos veces. Pagas 1 CP y resuelves el efecto. No puedes volver a usar esa misma Estratagema en la misma fase.",
+    tags: ["CP", "estratagemas", "battle-shocked"]
+  },
+  {
+    phase: "comando",
+    title: "Battleshock (inicio de turno)",
+    desc: "Al inicio de la Fase de Comando, cada unidad que haya perdido el 50% o más de sus miniaturas desde el inicio del turno enemigo debe hacer un test de Battleshock. Tira 2D6: si el resultado supera el Ld de la unidad, la unidad queda en estado Battle-shocked hasta el inicio de tu próximo turno.",
+    example: "Tu unidad de 10 marines ha perdido 5 o más desde el último turno rival. Ld 6+. Tiras 2D6 y sacas 8. 8 > 6, la unidad queda Battle-shocked: OC=0 y no puede recibir Estratagemas.",
+    tags: ["battleshock", "liderazgo", "LD", "OC"]
+  },
+
+  // ───────────── FASE DE MOVIMIENTO ─────────────
+  {
+    phase: "movimiento",
+    title: "Tipos de Movimiento",
+    desc: "Cada unidad puede hacer uno de estos movimientos: Normal (hasta su característica M), Avanzar (M + 1D6\", pero no puede disparar armas normales ese turno), o Retroceder (puede salir de combate, pero no puede cargar ni disparar armas normales).",
+    example: "Tu Rhino tiene M 12\". Se mueve 12\" en movimiento normal. Si avanza, tira 1D6 y saca 4, moviéndose 16\". Sin embargo, ya no puede disparar armas de Turret ese turno.",
+    tags: ["movimiento", "avanzar", "retroceder", "M"]
+  },
+  {
+    phase: "movimiento",
+    title: "Hidden (Oculto)",
+    desc: "Una unidad de tipo Infantería, Bestia o Enjambre puede ganar el estado Hidden si está completamente dentro de terreno Denso y no disparó armas en su turno anterior. Las unidades Hidden no pueden ser elegidas como objetivo por unidades enemigas a más de 15\" de distancia.",
+    example: "Tus Guardias Imperiales (Infantería) se colocan dentro de una ruina (terreno Denso) y no disparan. En el turno rival, una unidad enemiga a 20\" quiere disparar sobre ellos: no puede, están Hidden. Una unidad a 12\" sí puede elegirlos como objetivo.",
+    tags: ["hidden", "oculto", "cobertura", "terreno denso", "15 pulgadas"]
+  },
+  {
+    phase: "movimiento",
+    title: "Distancia de Engagement",
+    desc: "La distancia de Engagement es de 2\". Si una miniatura está a 2\" o menos de una miniatura enemiga, está trabada en combate. Una unidad trabada no puede finalizar un movimiento normal o de avance a 2\" de una unidad enemiga con la que no estuviera ya trabada.",
+    example: "Tus marines están a 1.5\" de unos Orks. Están trabados. No puedes mover otros marines a 1\" de otros Orks distintos con un movimiento normal; necesitarías cargar.",
+    tags: ["engagement", "trabado", "combate", "2 pulgadas"]
+  },
+  {
+    phase: "movimiento",
+    title: "Deep Strike",
+    desc: "Las unidades con la regla Deep Strike pueden ser colocadas en Reserva al inicio de la batalla. Puedes desplegarlas en tu Fase de Movimiento, colocándolas a más de 9\" de cualquier unidad enemiga y dentro de tu zona de despliegue o en cualquier punto del tablero según indique la regla.",
+    example: "Tus Terminators están en Reserva. En turno 2, los despliegas a 9.5\" de una unidad Ork: correcto. Si los pones a 8\", incorrecto, deben repetir la colocación.",
+    tags: ["deep strike", "reserva", "despliegue", "9 pulgadas"]
+  },
+
+  // ───────────── FASE DE DISPARO ─────────────
+  {
+    phase: "disparo",
+    title: "Cobertura (nueva regla 11ª ed.)",
+    desc: "En 11ª edición, la cobertura ya NO otorga +1 a la tirada de salvación. En cambio, aplica un modificador de -1 a la Habilidad Balística (BS) del atacante. Esto significa que los atacantes necesitan sacar un número mayor para impactar a unidades en cobertura.",
+    example: "Tus Intercessors (BS 3+) disparan contra marines en cobertura. El -1 a BS los convierte en BS 4+. Con BS 4+, necesitas sacar 4 o más en cada dado de impacto.",
+    tags: ["cobertura", "cover", "BS", "habilidad balística", "-1"]
+  },
+  {
+    phase: "disparo",
+    title: "Secuencia de Disparo",
+    desc: "1) Elige la unidad que va a disparar. 2) Elige el arma y el objetivo. 3) Tira para impactar (BS o WS). 4) Tira para herir (comparando S vs T). 5) El defensor tira salvaciones (Sv o invulnerable). 6) Retira bajas. Cada paso puede modificarse por reglas especiales.",
+    example: "Space Marine (BS3+, S4, AP-1) dispara contra un Guardián Eldar (T3, Sv4+). Impacta con 3+, hiere con 2+ (S4 dobla T3 o más), el Eldar salva con 4+ o 5+ por AP-1.",
+    tags: ["disparo", "impactar", "herir", "salvación", "secuencia"]
+  },
+  {
+    phase: "disparo",
+    title: "Tabla de Heridas (S vs T)",
+    desc: "S ≥ 2×T → 2+. S > T → 3+. S = T → 4+. S < T → 5+. S ≤ T/2 → 6+. Estos valores son los mínimos que debes sacar en el dado de herida.",
+    example: "Un Demolisher Cannon S14 dispara contra un Carnifex T10. S14 > T10×1 pero no dobla (necesitaría 20). S14 > T10, así que hiere con 3+.",
+    tags: ["herida", "fuerza", "resistencia", "S", "T", "tabla"]
+  },
+  {
+    phase: "disparo",
+    title: "Tiradas de Salvación",
+    desc: "Tras fallar la salvación armadura (Sv modificado por AP), el defensor puede intentar una salvación invulnerable si la tiene. La invulnerable no puede modificarse por AP. Si ambas fallan, la miniatura sufre Daño. Si el Daño (D) es mayor que las Heridas restantes (W) de la miniatura, la miniatura muere.",
+    example: "Un Thunder Hammer hace D3 daño contra un marine de 2W que ya tiene 1 herida. Falla la salvación armadura y no tiene invulnerable. El daño resultante (por ejemplo, 2) mata al marine aunque solo le quedara 1 herida.",
+    tags: ["salvación", "invulnerable", "AP", "daño", "W", "heridas"]
+  },
+  {
+    phase: "disparo",
+    title: "Feel No Pain (FNP)",
+    desc: "Algunas unidades tienen la regla Feel No Pain X+. Después de fallar todas las salvaciones y recibir daño, puedes tirar 1D6 por cada punto de daño: con X+, ese daño se ignora. Se aplica tras la salvación invulnerable.",
+    example: "Tus Death Guard tienen FNP 5+. Reciben 2 puntos de daño. Tiras 2D6: sacas 5 y 2. El primer dado ignora 1 daño, el segundo no. La miniatura recibe 1 daño en total.",
+    tags: ["FNP", "feel no pain", "daño", "death guard"]
+  },
+  {
+    phase: "disparo",
+    title: "Armas de Fuego Indirecto",
+    desc: "Las armas con la regla Indirect Fire pueden disparar a unidades que no sean visibles. Para ello, el objetivo debe estar dentro del alcance del arma. Las unidades que disparan de esta forma sufren -1 a su BS (además de otros modificadores). No se puede usar Indirect Fire contra unidades Hidden.",
+    example: "Tu Whirlwind (Indirect Fire) dispara contra marines detrás de un edificio. Su BS normal es 3+. Con el -1 de Indirect Fire, impacta con 4+. Si el objetivo también estuviera en cobertura, sería 5+.",
+    tags: ["indirect fire", "fuego indirecto", "visibilidad", "BS"]
+  },
+
+  // ───────────── FASE DE CARGA ─────────────
+  {
+    phase: "carga",
+    title: "Secuencia de Carga",
+    desc: "1) Declara que la unidad carga. 2) Tira 2D6 para obtener la distancia de carga. 3) DESPUÉS de ver el resultado, eliges los objetivos que estén dentro de esa distancia máxima. 4) Mueves la unidad para que al menos una miniatura quede a 1\" o menos del objetivo elegido.",
+    example: "Tus marines declaran carga. Sacas 9 en 2D6. Ahora eliges un objetivo a 8\" (dentro de los 9\") O decides apuntar a otro a 9\" exactos. Si el más cercano está a 10\", la carga falla.",
+    tags: ["carga", "charge", "2D6", "distancia de carga"]
+  },
+  {
+    phase: "carga",
+    title: "Disparos de Oportunidad (Overwatch)",
+    desc: "Cuando una unidad enemiga declara una carga, puedes gastar 1 CP para que una de tus unidades que sería objetivo de esa carga dispare como Overwatch. Se resuelve antes de tirar la distancia de carga. Solo se impacta con 6s (sin modificadores).",
+    example: "Los Orks cargan sobre tus Intercessors. Gastas 1 CP, tus Intercessors disparan Overwatch. Con 10 dados de impacto, solo los 6s impactan. Sacas 2 seises: 2 impactos potenciales.",
+    tags: ["overwatch", "disparo de oportunidad", "CP", "1 CP"]
+  },
+  {
+    phase: "carga",
+    title: "Heroic Intervention",
+    desc: "Cuando el enemigo termina una carga, los personajes (Character) y unidades con la regla Heroic Intervention que estén a 6\" o menos del enemigo que ha cargado pueden hacer una Intervención Heroica: mueven hasta 3\" para quedar a 1\" del enemigo que cargó.",
+    example: "Un Capitán Space Marine está a 5\" de los Orks que acaban de cargar. Declara Heroic Intervention y mueve 3\" hacia los Orks, quedando trabado. Ahora luchará en la Fase de Combate.",
+    tags: ["heroic intervention", "character", "personaje", "3 pulgadas"]
+  },
+
+  // ───────────── FASE DE COMBATE ─────────────
+  {
+    phase: "combate",
+    title: "Activaciones Alternadas",
+    desc: "En 11ª edición, el jugador activo elige la primera unidad que lucha (siempre que tenga Fights First si el rival tiene alguna). Después los jugadores se alternan eligiendo quién lucha. Una unidad puede luchar si está trabada o si tiene la regla Fights First.",
+    example: "Turno: Marines vs Orks. El jugador de marines elige primero quién lucha (sus marines). Luego el de Orks elige una unidad Ork. Se alternan hasta que todas las unidades elegibles hayan luchado.",
+    tags: ["combate", "alternado", "fights first", "activación"]
+  },
+  {
+    phase: "combate",
+    title: "Fights First",
+    desc: "Las unidades con Fights First luchan antes que las unidades normales en la Fase de Combate, independientemente de quién haya cargado. En 11ª edición, el jugador activo elige cuál de sus unidades con Fights First ataca primero, luego se alternan con el rival.",
+    example: "Tus marines cargan sobre Genestealers (Fights First). Aunque hayas cargado, los Genestealers atacan antes porque tienen Fights First. Dentro de Fights First, tú (activo) eliges primero cuál de TUS Fights First ataca.",
+    tags: ["fights first", "combate", "genestealers", "prioridad"]
+  },
+  {
+    phase: "combate",
+    title: "Pooled Saves (Salvaciones Agrupadas)",
+    desc: "Cuando una unidad recibe ataques, si hay múltiples miniaturas iguales, se agrupan todas las tiradas de daño. El defensor asigna los resultados de las salvaciones fallidas a las miniaturas de su elección, pero debe rellenar completamente una miniatura antes de pasar a la siguiente.",
+    example: "5 marines reciben 4 impactos con D2. Fallan 3 salvaciones (6 daños). Debes matar 3 marines completos (2W cada uno) antes de distribuir. Un marine muere con los primeros 2 daños, el segundo con los siguientes 2, el tercero absorbe los últimos 2.",
+    tags: ["pooled saves", "salvaciones", "daño", "bajas"]
+  },
+  {
+    phase: "combate",
+    title: "Habilidad Balística en Combate (WS)",
+    desc: "En combate cuerpo a cuerpo se usa la Habilidad en Combate (WS). La mecánica de impactar es igual que en disparo pero comparando WS. Los modificadores a impactar también se aplican igual.",
+    example: "Un marine (WS 3+) ataca a un Guardián Eldar. Necesita sacar 3+ para impactar. Si tuviera -1 a impactar (por alguna regla especial), necesitaría 4+.",
+    tags: ["WS", "habilidad en combate", "cuerpo a cuerpo", "impactar"]
+  },
+  {
+    phase: "combate",
+    title: "Pistolas en Combate",
+    desc: "Las armas con el tipo Pistol pueden dispararse en la Fase de Combate en lugar de atacar con armas de cuerpo a cuerpo. Se usan las reglas normales de disparo pero solo puedes elegir un objetivo trabado con la unidad.",
+    example: "Tus marines tienen Bolt Pistols. En la Fase de Combate, en vez de usar sus armas de cuerpo a cuerpo, eligen disparar las pistolas contra los Orks trabados. Impactan con BS 3+.",
+    tags: ["pistola", "pistol", "combate", "disparo en combate"]
+  },
+
+  // ───────────── FASE DE MORAL ─────────────
+  {
+    phase: "moral",
+    title: "Test de Battleshock",
+    desc: "Al inicio de tu Fase de Comando, cada unidad que haya perdido el 50% o más de sus miniaturas desde el inicio del turno rival debe hacer un test de Battleshock. Tira 2D6: si supera el Ld de la unidad, queda Battle-shocked hasta tu próximo turno.",
+    example: "Unidad de 10 guardias, Ld 6. Han muerto 5 desde el turno rival. Tiras 2D6 = 8. 8 > 6, quedan Battle-shocked. Si sacas 6 o menos, pasan el test.",
+    tags: ["battleshock", "moral", "Ld", "liderazgo", "2D6"]
+  },
+  {
+    phase: "moral",
+    title: "Estado Battle-shocked",
+    desc: "Una unidad Battle-shocked tiene las siguientes penalizaciones hasta el inicio de tu próximo turno: Objective Control (OC) = 0, no puede ser el objetivo de Estratagemas tuyas, y debe repetir el test de Battleshock al inicio de tu siguiente Fase de Comando para recuperarse.",
+    example: "Tus marines están Battle-shocked. Su OC normal de 2 se convierte en 0: no contribuyen al control de objetivos. No puedes gastar CP en Estratagemas para ayudarles. Al inicio de tu siguiente turno, repiten el test.",
+    tags: ["battle-shocked", "OC", "objetivo", "estratagemas", "penalización"]
+  },
+  {
+    phase: "moral",
+    title: "Liderazgo (Ld)",
+    desc: "El Liderazgo (Ld) determina con qué facilidad una unidad supera los tests de Battleshock. Se expresa como X+. Cuanto más bajo el número, mejor el Ld. Un Ld 5+ significa que necesitas sacar 5 o más en 2D6 para FALLAR el test (los 2D6 deben superar el valor de Ld para fallar).",
+    example: "Ld 7+ es relativamente malo: cualquier resultado de 8 o más en 2D6 (que ocurre ~42% de las veces) falla el test. Ld 4+ es excelente: solo fallas con 5 o más en 2D6.",
+    tags: ["liderazgo", "LD", "battleshock", "probabilidad"]
+  },
+  {
+    phase: "moral",
+    title: "Objetivo de Control (OC)",
+    desc: "El Objetivo de Control (OC) determina cuánto contribuye una miniatura al control de marcadores de objetivos. Sumas el OC de todas las miniaturas de tu unidad sobre o cerca del marcador. Quien tenga mayor OC total controla el objetivo.",
+    example: "3 marines (OC 2 cada uno) = 6 OC total. 5 Guardias (OC 1 cada uno) = 5 OC total. Los marines controlan el objetivo. Si los Guardias estuvieran Battle-shocked, su OC sería 0.",
+    tags: ["OC", "objetivo", "control", "marcador"]
+  }
+];
+
+// ── PHASE LABELS ──
+const PHASE_LABELS = {
+  all: "Todas",
+  comando: "Comando",
+  movimiento: "Movimiento",
+  disparo: "Disparo",
+  carga: "Carga",
+  combate: "Combate",
+  moral: "Moral"
+};
+
+// ── STATE ──
+let activePhase = "all";
+let searchQuery = "";
+
+// ── HELPERS ──
+function highlight(text, query) {
+  if (!query) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
+}
+
+function matchesSearch(rule, query) {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  return (
+    rule.title.toLowerCase().includes(q) ||
+    rule.desc.toLowerCase().includes(q) ||
+    rule.example.toLowerCase().includes(q) ||
+    rule.tags.some(t => t.toLowerCase().includes(q)) ||
+    PHASE_LABELS[rule.phase].toLowerCase().includes(q)
+  );
+}
+
+function render() {
+  const list = document.getElementById('rules-list');
+  const info = document.getElementById('results-info');
+
+  const filtered = RULES.filter(r => {
+    const phaseOk = activePhase === 'all' || r.phase === activePhase;
+    const searchOk = matchesSearch(r, searchQuery);
+    return phaseOk && searchOk;
+  });
+
+  info.textContent = filtered.length === RULES.length
+    ? `${RULES.length} reglas`
+    : `${filtered.length} de ${RULES.length} reglas`;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="no-results">
+        <div class="icon">🎲</div>
+        <p>No se encontraron reglas para "<strong>${searchQuery}</strong>"</p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map((rule, i) => {
+    const q = searchQuery;
+    const titleHl = highlight(rule.title, q);
+    const descHl  = highlight(rule.desc, q);
+    const exHl    = highlight(rule.example, q);
+    return `
+      <div class="rule-card" data-phase="${rule.phase}" data-idx="${i}">
+        <div class="rule-header">
+          <span class="phase-dot"></span>
+          <span class="rule-title">${titleHl}</span>
+          <span class="phase-badge">${PHASE_LABELS[rule.phase]}</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="rule-body">
+          <p class="rule-desc">${descHl}</p>
+          <div class="rule-example">
+            <strong>⚔ Ejemplo</strong>
+            ${exHl}
+          </div>
+          <div class="rule-tags">${rule.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Toggle open/close
+  list.querySelectorAll('.rule-header').forEach(header => {
+    header.addEventListener('click', () => {
+      header.closest('.rule-card').classList.toggle('open');
+    });
+  });
+}
+
+// ── EVENTS ──
+document.getElementById('search').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  render();
+});
+
+document.querySelectorAll('.phase-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.phase-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activePhase = btn.dataset.phase;
+    render();
+  });
+});
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>
