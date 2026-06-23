@@ -21,6 +21,7 @@
       --phase-charge: #d35400;
       --phase-fight: #c0392b;
       --phase-morale: #27ae60;
+      --phase-kw: #16a085;
       --radius: 10px;
     }
 
@@ -140,6 +141,7 @@
     .phase-btn[data-phase="carga"].active    { background: var(--phase-charge); border-color: var(--phase-charge); color: #fff; }
     .phase-btn[data-phase="combate"].active  { background: var(--phase-fight); border-color: var(--phase-fight); color: #fff; }
     .phase-btn[data-phase="moral"].active    { background: var(--phase-morale); border-color: var(--phase-morale); color: #fff; }
+    .phase-btn[data-phase="keywords"].active { background: var(--phase-kw); border-color: var(--phase-kw); color: #fff; }
 
     /* MAIN */
     main {
@@ -275,6 +277,7 @@
     [data-phase="carga"]     .phase-dot { background: var(--phase-charge); }
     [data-phase="combate"]   .phase-dot { background: var(--phase-fight); }
     [data-phase="moral"]     .phase-dot { background: var(--phase-morale); }
+    [data-phase="keywords"]  .phase-dot { background: var(--phase-kw); }
 
     [data-phase="comando"]   .phase-badge { background: #8e44ad33; color: #c39bd3; }
     [data-phase="movimiento"] .phase-badge { background: #2980b933; color: #85c1e9; }
@@ -282,6 +285,36 @@
     [data-phase="carga"]     .phase-badge { background: #d3540033; color: #f0b27a; }
     [data-phase="combate"]   .phase-badge { background: #c0392b33; color: #f1948a; }
     [data-phase="moral"]     .phase-badge { background: #27ae6033; color: #82e0aa; }
+    [data-phase="keywords"]  .phase-badge { background: #16a08533; color: #76d7c4; }
+
+    .changed-badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: #c9a84c22;
+      color: var(--gold);
+      border: 1px solid #c9a84c44;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .new-badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: #16a08522;
+      color: #76d7c4;
+      border: 1px solid #16a08544;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
 
     /* HIGHLIGHT */
     mark {
@@ -330,6 +363,7 @@
   <button class="phase-btn" data-phase="carga">💨 Carga</button>
   <button class="phase-btn" data-phase="combate">⚡ Combate</button>
   <button class="phase-btn" data-phase="moral">🧠 Moral</button>
+  <button class="phase-btn" data-phase="keywords">🔑 Keywords</button>
 </div>
 
 <main>
@@ -520,6 +554,157 @@ const RULES = [
     example: "Ld 7+ es relativamente malo: cualquier resultado de 8 o más en 2D6 (que ocurre ~42% de las veces) falla el test. Ld 4+ es excelente: solo fallas con 5 o más en 2D6.",
     tags: ["liderazgo", "LD", "battleshock", "probabilidad"]
   },
+  // ───────────── KEYWORDS DE ARMA ─────────────
+  {
+    phase: "keywords",
+    title: "Lethal Hits <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "Los impactos no modificados de 6 hieren automáticamente sin tirar para herir. Se apartan tras impactar; el resto de impactos se tiran para herir normalmente. Las heridas automáticas de Lethal Hits NO son Heridas Críticas, por lo que el objetivo puede salvarse contra ellas. <strong>Novedad 11ª:</strong> la herida automática es ahora opcional — omítela si el arma tiene Anti y Devastating Wounds a la vez.",
+    example: "Tus marines tienen un arma con Lethal Hits. Tiras 5 dados de impacto y sacas 6, 4, 3, 6, 2. Los dos 6 hieren automáticamente (apártalos). Los otros tres (4, 3, 2) se tiran para herir normalmente. Las dos heridas automáticas pueden ser salvadas por el rival.",
+    tags: ["lethal hits", "6 para impactar", "herida automática", "keyword arma"]
+  },
+  {
+    phase: "keywords",
+    title: "Sustained Hits X",
+    desc: "Los impactos no modificados de 6 generan X impactos automáticos adicionales junto al impacto original. Los impactos adicionales NO son Impactos Críticos. Si se combina con Lethal Hits: un impacto del 6 original hiere automáticamente (Lethal Hits) y además genera X impactos adicionales que deben tirar para herir normalmente.",
+    example: "Sustained Hits 2. Tiras 4 dados de impacto, sacas un 6. Ese 6 cuenta como 3 impactos (el original + 2 adicionales). Los 3 van a tirar para herir normalmente. Los otros 3 dados también se resuelven si impactan.",
+    tags: ["sustained hits", "impactos adicionales", "6 para impactar", "keyword arma"]
+  },
+  {
+    phase: "keywords",
+    title: "Devastating Wounds",
+    desc: "Las Heridas Críticas (tiradas de herir no modificadas de 6, o el umbral de Anti si es menor) ignoran todas las tiradas de Salvación Armadura e Invulnerable. Solo el Feel No Pain puede salvar contra ellas. Cada Herida Crítica afecta como máximo a una miniatura, sin importar el valor de Daño.",
+    example: "Tu Assault Cannon (Devastating Wounds) tira para herir y saca un 6 no modificado. Esa herida no puede ser salvada por armadura ni invulnerable. El rival solo puede usar FNP si lo tiene. Aun así, si el arma tiene D3 daño, ese daño va todo a una sola miniatura.",
+    tags: ["devastating wounds", "herida crítica", "ignorar salvación", "keyword arma"]
+  },
+  {
+    phase: "keywords",
+    title: "Anti-[Keyword] X+",
+    desc: "Escrito como Anti-[keyword] X+. Las tiradas de herir que igualen o superen X+ contra una unidad con el keyword correspondiente cuentan como Heridas Críticas y siempre tienen éxito. Se combina con Devastating Wounds para convertir esas críticas en heridas que ignoran armadura e invulnerable.",
+    example: "Haywire Blaster tiene Anti-Vehicle 4+. Disparo contra un tanque (keyword Vehicle). Si saco 4+ en la tirada de herir, es una Herida Crítica automática. Si además tiene Devastating Wounds, esa herida no puede ser salvada.",
+    tags: ["anti", "keyword arma", "vehicle", "herida crítica"]
+  },
+  {
+    phase: "keywords",
+    title: "Torrent",
+    desc: "Los ataques impactan automáticamente, sin tirada de BS. El número de impactos viene directamente de la característica de Ataques del arma (la BS aparece como N/A). Ignora inherentemente la cobertura. En Overwatch, el impacto automático se aplica aunque otras armas solo impacten con 6+.",
+    example: "Tu Heldrake usa su Baleflamer (Torrent, 2D6 ataques). Tira 2D6 = 9. Obtiene 9 impactos automáticos, sin tirar para impactar. En Overwatch, esos 9 impactos también son automáticos mientras otras armas necesitarían 6+.",
+    tags: ["torrent", "impacto automático", "lanzallamas", "keyword arma"]
+  },
+  {
+    phase: "keywords",
+    title: "Blast (X) <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "+1 Ataque por cada 5 miniaturas completas en la unidad objetivo, multiplicado por X. Blast (sin número) equivale a ×1. <strong>No puede usarse contra unidades en Engagement Range bajo ninguna circunstancia.</strong> Novedad 11ª: el multiplicador X es nuevo; en 10ª solo era +1 plano por cada 5 sin multiplicar.",
+    example: "Leman Russ Battle Cannon (Blast 2) dispara a una unidad de 13 Orks (2 grupos completos de 5 = 2). +2×2 = 4 ataques adicionales. Si la unidad tuviera 17 Orks (3 grupos de 5), serían +3×2 = 6 ataques extra. No puede dispararse si los Orks están en Engagement Range.",
+    tags: ["blast", "área", "keyword arma", "ataques adicionales"]
+  },
+  {
+    phase: "keywords",
+    title: "Rapid Fire X",
+    desc: "Ganas X ataques adicionales cuando el objetivo está dentro de la mitad del alcance del arma. Se evalúa miniatura por miniatura. X puede ser un número fijo o una expresión de dados.",
+    example: "Rapid Fire Battle Cannon (Rapid Fire 1, alcance 48\"). A más de 24\" dispara con su número base. A 24\" o menos gana 1 ataque adicional por miniatura. Si la unidad tiene 5 marines disparando, obtienen 5 ataques extra.",
+    tags: ["rapid fire", "media distancia", "keyword arma", "ataques adicionales"]
+  },
+  {
+    phase: "keywords",
+    title: "Heavy <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "+1 a impactar si TODAS las miniaturas de la unidad se movieron menos de 3\" en su fase de movimiento anterior. No aplica si la unidad está en Engagement Range, si se desplegó este turno (Deep Strike, transporte) ni si cargó. Es todo-o-nada: basta con que una miniatura se mueva 3\" o más para perder el bonus toda la unidad. <strong>Cambio respecto a 10ª:</strong> antes requería quedarse completamente parado; ahora permite hasta 3\" de movimiento.",
+    example: "Tus Eradicators (Heavy) se mueven 2\" para ponerse en línea de visión. Todas las miniaturas se mueven menos de 3\", así que mantienen el +1 a impactar. Si alguna se mueve 3.5\", toda la unidad pierde el bonus.",
+    tags: ["heavy", "+1 impactar", "movimiento", "keyword arma"]
+  },
+  {
+    phase: "keywords",
+    title: "Melta X <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "+X Daño cuando se dispara dentro de la mitad del alcance. Se evalúa miniatura por miniatura: las miniaturas dentro de media distancia aplican el bonus, las de fuera no. Los efectos reductores de daño se aplican DESPUÉS de añadir el bonus Melta. <strong>Cambio 11ª:</strong> secuencia aclarada — primero daño base, luego suma Melta, luego aplica reducción.",
+    example: "Melter Rifle (D3+3, Melta 2, alcance 24\"). A 10\" (media distancia): cada impacto que hiera hace D3+3+2 daño antes de aplicar cualquier reducción. A 25\": solo hace D3+3. Si el rival tiene -1 daño, se aplica al total final.",
+    tags: ["melta", "media distancia", "daño adicional", "keyword arma"]
+  },
+  {
+    phase: "keywords",
+    title: "Twin-linked",
+    desc: "Permite repetir tiradas de herir fallidas. Funciona tanto en perfiles de disparo como en perfiles de combate cuerpo a cuerpo.",
+    example: "Tu Aggressor dispara con su Twin-linked Boltstorm Gauntlet. Tira 6 dados de herir y falla 3. Repite esos 3 dados gracias a Twin-linked. Los nuevos resultados se aplican normalmente.",
+    tags: ["twin-linked", "repetir herir", "keyword arma"]
+  },
+  {
+    phase: "keywords",
+    title: "Hazardous <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "Tras atacar, tira 1D6 por cada arma Hazardous usada por la unidad. Con 1 o 2: la unidad sufre 1 Herida Mortal (3 si es Monstruo o Vehículo). No se pueden usar salvaciones de ningún tipo, solo Feel No Pain. Si el arma la dispara un Personaje, la herida mortal va al Personaje y no a su unidad de escolta. <strong>Cambio 11ª:</strong> antes fallaba solo con 1 y eliminaba una miniatura; ahora falla con 1-2 y hace 1 Herida Mortal.",
+    example: "Tus Hellblasters disparan Plasma Incinerators. Tiras 5D6 (uno por miniatura). Sacas 1, 4, 2, 6, 3. Los resultados 1 y 2 fallan: la unidad sufre 2 Heridas Mortales. Solo el FNP puede mitigarlas.",
+    tags: ["hazardous", "plasma", "herida mortal", "keyword arma"]
+  },
+  {
+    phase: "keywords",
+    title: "Close Quarters <span class='new-badge'>Nuevo en 11ª</span>",
+    desc: "Permite disparar este arma mientras la unidad está en Engagement Range (trabada en combate). Reemplaza al antiguo keyword Pistol de 10ª edición. Las armas con Close Quarters pueden usarse en la Fase de Combate en lugar de las armas de cuerpo a cuerpo.",
+    example: "Tu Capitán tiene una Bolt Pistol (Close Quarters). Aunque está trabado con Orks, puede disparar la pistola en la Fase de Combate eligiendo como objetivo una unidad de Orks trabada con él.",
+    tags: ["close quarters", "pistol", "engagement range", "nuevo 11ª", "keyword arma"]
+  },
+  {
+    phase: "keywords",
+    title: "Cleave X <span class='new-badge'>Nuevo en 11ª</span>",
+    desc: "+1 Ataque cuerpo a cuerpo por cada 5 miniaturas completas en la unidad objetivo, multiplicado por X. Todos los ataques con ese perfil deben dirigirse a la misma unidad para obtener el bonus; si divides ataques entre unidades, pierdes Cleave. Es el equivalente en combate de Blast.",
+    example: "Warboss con Choppa (Cleave 1) ataca a una unidad de 13 Space Marines (2 grupos de 5). +2×1 = 2 ataques extra. Si decide dividir sus ataques entre dos unidades distintas, pierde el bonus y ataca con su número base.",
+    tags: ["cleave", "cuerpo a cuerpo", "nuevo 11ª", "keyword arma", "ataques adicionales"]
+  },
+  {
+    phase: "keywords",
+    title: "Precision",
+    desc: "Cuando atacas a una unidad que contiene un Personaje visible, puedes asignar las heridas a ese Personaje antes que al resto de miniaturas. El exceso de daño se distribuye al resto de la unidad. Funciona tanto en disparo como en combate.",
+    example: "Tu Vindicare Assassin dispara su Exodus Pistol (Precision) a una unidad con un Capitán incrustado. Puedes asignar todas las heridas directamente al Capitán. Si hace 3 daños y el Capitán solo tiene 1 herida, el exceso (2 daños) pasa a las miniaturas normales de la unidad.",
+    tags: ["precision", "personaje", "character", "asignar heridas", "keyword arma"]
+  },
+  {
+    phase: "keywords",
+    title: "Ignores Cover <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "Ignora el modificador de -1 a BS que otorga la cobertura. El arma dispara con su BS completa y sin modificar independientemente del terreno o regla Stealth. <strong>Cambio 11ª:</strong> en 10ª ignoraba el +1 a la tirada de salvación; ahora ignora el -1 a BS (que es cómo funciona la cobertura en 11ª). También es redundante en armas Torrent, que ya ignoran la BS.",
+    example: "Tus Purifiers tienen Purifying Flame (Ignores Cover). Disparan contra marines en cobertura. Mientras otras unidades dispararían con -1 a su BS, los Purifiers disparan a su BS completa sin penalizador.",
+    tags: ["ignores cover", "cobertura", "BS", "keyword arma"]
+  },
+
+  // ───────────── KEYWORDS DE UNIDAD ─────────────
+  {
+    phase: "keywords",
+    title: "Lone Operative <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "No puede ser elegido como objetivo por ataques a distancia a menos que la unidad atacante esté dentro de una distancia determinada. Por defecto es 12\", pero algunos perfiles indican Lone Operative X\". <strong>Cambio 11ª:</strong> ahora puede tener distancias distintas a 12\" según el perfil.",
+    example: "Tu Librarian (Lone Operative) está a solas. Una unidad enemiga a 15\" quiere dispararle: no puede. Una unidad a 10\" sí puede elegirle como objetivo. Si el perfil dijera Lone Operative 18\", nadie podría dispararle a más de 18\".",
+    tags: ["lone operative", "objetivo", "personaje", "keyword unidad"]
+  },
+  {
+    phase: "keywords",
+    title: "Deadly Demise X <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "Cuando la unidad es destruida, tira 1D6. Con un 6, inflige X Heridas Mortales a todas las unidades dentro del alcance indicado en el perfil. Para los Transportes, se activa DESPUÉS de que las unidades desembarquen. <strong>Cambio 11ª:</strong> en 10ª los Transportes activaban Deadly Demise antes de desembarcar.",
+    example: "Tu Rhino (Deadly Demise 1) es destruido con tropas dentro. Primero desembarcan las tropas (si pueden). Luego tiras el D6: si sacas 6, todas las unidades (incluyendo las recién desembarcadas) dentro del radio sufren 1 Herida Mortal.",
+    tags: ["deadly demise", "herida mortal", "destruido", "transporte", "keyword unidad"]
+  },
+  {
+    phase: "keywords",
+    title: "Scouts X\" <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "Antes del primer turno, la unidad puede hacer un movimiento gratuito de hasta X\". <strong>Solo funciona si la unidad se desplegó dentro de tu zona de despliegue.</strong> Si empieza en Reservas Estratégicas, puede colocarse en cualquier punto de tu zona de despliegue al inicio de la Ronda de Batalla 1. <strong>Cambio 11ª:</strong> ya no funciona si se desplegó fuera de la zona de despliegue.",
+    example: "Tus Scout Marines (Scouts 6\") se despliegan en tu zona. Antes del turno 1 (incluso antes de que el rival despliegue si vas primero), hacen un movimiento gratuito de hasta 6\". No pueden quedar a 9\" del rival tras el movimiento Scout.",
+    tags: ["scouts", "movimiento previo", "keyword unidad", "despliegue"]
+  },
+  {
+    phase: "keywords",
+    title: "Stealth <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "La unidad siempre se beneficia de Cobertura aunque esté al descubierto, aplicando un -1 a la BS de las unidades que le disparen. <strong>Cambio 11ª:</strong> en 10ª otorgaba directamente -1 a impactar; en 11ª otorga Cobertura (-1 BS), que es equivalente pero técnicamente diferente (ya que la cobertura ahora funciona como -1 BS).",
+    example: "Tus Raven Guard con Stealth están en terreno abierto. Cualquier unidad que les dispare sufre -1 a su BS como si estuvieran en cobertura. Si además estuvieran en terreno denso, el -1 no se acumula (cobertura no se apila).",
+    tags: ["stealth", "cobertura", "BS", "-1 impactar", "keyword unidad"]
+  },
+  {
+    phase: "keywords",
+    title: "Infiltrators <span class='changed-badge'>Cambia en 11ª</span>",
+    desc: "La unidad puede colocarse en cualquier punto del campo de batalla a más de 8\" de las zonas de despliegue enemigas y a más de 8\" de todas las unidades enemigas. <strong>Cambio 11ª:</strong> la distancia mínima se redujo de 9\" a 8\" para adaptarse a las nuevas reglas de carga.",
+    example: "Tus Infiltrators se despliegan en la línea central. Los colocas a 8.5\" de las unidades enemigas más cercanas y a 8.1\" de la zona de despliegue rival. Si los pones a 7\", incorrecto.",
+    tags: ["infiltrators", "despliegue", "8 pulgadas", "keyword unidad"]
+  },
+  {
+    phase: "keywords",
+    title: "Heal X <span class='new-badge'>Nuevo en 11ª</span>",
+    desc: "Cuando se aplica Heal a una unidad, se comprueban primero las miniaturas con heridas perdidas y se restaura una herida por Heal. Si no hay miniaturas heridas, se devuelve una miniatura con 1 herida. Se repite X veces. Si el objetivo es una miniatura única, los Heals sobrantes se pierden.",
+    example: "Usas Heal 2 sobre una unidad de 5 marines donde 2 tienen heridas perdidas y hay 1 muerto. Primer Heal: restaura 1 herida a un marine dañado. Segundo Heal: restaura 1 herida al otro marine dañado. El marine muerto no se devuelve porque todavía hay miniaturas dañadas.",
+    tags: ["heal", "curar", "heridas", "nuevo 11ª", "keyword unidad"]
+  },
+
   {
     phase: "moral",
     title: "Objetivo de Control (OC)",
@@ -537,7 +722,8 @@ const PHASE_LABELS = {
   disparo: "Disparo",
   carga: "Carga",
   combate: "Combate",
-  moral: "Moral"
+  moral: "Moral",
+  keywords: "Keywords"
 };
 
 // ── STATE ──
@@ -545,6 +731,10 @@ let activePhase = "all";
 let searchQuery = "";
 
 // ── HELPERS ──
+function stripHtml(html) {
+  return html.replace(/<[^>]+>/g, '');
+}
+
 function highlight(text, query) {
   if (!query) return text;
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -555,8 +745,8 @@ function matchesSearch(rule, query) {
   if (!query) return true;
   const q = query.toLowerCase();
   return (
-    rule.title.toLowerCase().includes(q) ||
-    rule.desc.toLowerCase().includes(q) ||
+    stripHtml(rule.title).toLowerCase().includes(q) ||
+    stripHtml(rule.desc).toLowerCase().includes(q) ||
     rule.example.toLowerCase().includes(q) ||
     rule.tags.some(t => t.toLowerCase().includes(q)) ||
     PHASE_LABELS[rule.phase].toLowerCase().includes(q)
